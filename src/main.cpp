@@ -18,8 +18,8 @@ Preferences preferences;
 
 #include "secrets.cpp"
 
-SinricProBlinds &rightBlinds = SinricPro[RIGHT_BLINDS_ID];
-SinricProBlinds &leftBlinds = SinricPro[LEFT_BLINDS_ID];
+SinricProBlinds &rightBlinds = SinricPro[secrets.sinric.right_blinds_id];
+SinricProBlinds &leftBlinds = SinricPro[secrets.sinric.left_blinds_id];
 
 int blindsPosition = 0;
 bool powerState = false;
@@ -152,7 +152,7 @@ void setupWiFi() {
     delay(1000);
     WiFi.onEvent(WiFiDisconnected, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
 
-    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    WiFi.begin(secrets.wifi.ssid, secrets.wifi.pass);
     Serial.printf("\r\n[Wifi]: Connecting");
 
     Reconnect();
@@ -175,7 +175,7 @@ void setupSinricPro() {
     // setup SinricPro
     SinricPro.onConnected([](){ Serial.printf("Connected to SinricPro\r\n"); });
     SinricPro.onDisconnected([](){ Serial.printf("Disconnected from SinricPro\r\n"); });
-    SinricPro.begin(APP_KEY, APP_SECRET);
+    SinricPro.begin(secrets.sinric.app_key, secrets.sinric.app_secret);
 }
 
 void setupBlinds(){
@@ -286,7 +286,7 @@ void step(){
 void setup() {
     setCpuFrequencyMhz(240); //Set CPU clock to 80MHz fo example
 
-    Serial.begin(BAUD_RATE); Serial.printf("\r\n\r\n");
+    Serial.begin(secrets.sinric.baud_rate); Serial.printf("\r\n\r\n");
     preferences.begin("rollos", false);
     setupWiFi();
     setupSinricPro();
