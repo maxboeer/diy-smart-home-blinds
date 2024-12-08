@@ -31,33 +31,30 @@ void Blind::doTick() {
     }
 
     // Parameters
-    double polynomial_percentage = 0.15; // Percentage of total steps for polynomial
-    double inflection_shift_percentage = 0.1; // Shift inflection points symmetrically
-    double curvature = 3.0; // Curvature factor
-    double max_speed = 1.0 / steptime_low; // Maximum speed
-
-    // Calculate total steps and polynomial length
-    double total_steps = abs(delta_steps) + iterations;
-    double polynomial_length = total_steps * polynomial_percentage;
-    double inflection_shift = polynomial_length * inflection_shift_percentage;
+    double L_accel = 1000; // Total length of the acceleration phase
+    double L_decel = 1000; // Total length of the deceleration phase
+    double M = 1.0 / steptime_low; // Maximum speed (y-value)
+    double c_accel = 3.0; // Curvature for acceleration
+    double c_decel = 3.0; // Curvature for deceleration
+    double t_w_accel = 0.5; // Midpoint of the acceleration phase (percentage of L_accel)
+    double t_w_decel = 0.5; // Midpoint of the deceleration phase (percentage of L_decel)
 
     // Calculate normalized time (0 to 1)
-    double t = double(iterations) / total_steps;
+    double x = double(iterations);
     double speed = 0.0;
 
-    // Acceleration phase (cubic polynomial)
-    if (t <= (polynomial_length + inflection_shift) / total_steps) {
-        double t_accel = t / ((polynomial_length + inflection_shift) / total_steps);
-        speed = max_speed * (curvature * t_accel * t_accel - (curvature - 1) * t_accel * t_accel * t_accel);
+    // Acceleration phase
+    if (x <= L_accel) {
+        speed = M * pow(x / (t_w_accel * L_accel), c_accel) / (pow(x / (t_w_accel * L_accel), c_accel) + pow((L_accel - x) / ((1 - t_w_accel) * L_accel), c_accel));
+    }
+        // Deceleration phase
+    else if (x >= (abs(delta_steps) - L_decel)) {
+        double x_decel = abs(delta_steps) - x;
+        speed = M * pow(x_decel / (t_w_decel * L_decel), c_decel) / (pow(x_decel / (t_w_decel * L_decel), c_decel) + pow((L_decel - x_decel) / ((1 - t_w_decel) * L_decel), c_decel));
     }
         // Constant speed phase
-    else if (t > (polynomial_length + inflection_shift) / total_steps && t < (1 - (polynomial_length + inflection_shift) / total_steps)) {
-        speed = max_speed;
-    }
-        // Deceleration phase (cubic polynomial)
-    else if (t >= (1 - (polynomial_length + inflection_shift) / total_steps)) {
-        double t_decel = (1 - t) / ((polynomial_length + inflection_shift) / total_steps);
-        speed = max_speed * (curvature * t_decel * t_decel - (curvature - 1) * t_decel * t_decel * t_decel);
+    else {
+        speed = M;
     }
 
     // Convert speed to step time
