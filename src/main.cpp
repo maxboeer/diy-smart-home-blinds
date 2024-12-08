@@ -32,15 +32,15 @@ void setup() {
     setCpuFrequencyMhz(240); // Set CPU clock to 240MHz
 
     Serial.begin(secrets.sinric.baud_rate); Serial.printf("\r\n\r\n");
-    preferences.begin("rollos", false);
+    EEPROM::init("rollos");
 
     //setupWiFi();
     //Sinric Setup
     //setupBlinds();
     WifiManager::setup(secrets.wifi.ssid, secrets.wifi.pass, 1000*1000*15);
     blindManager = new BlindManager(17, 16);
-    blindManager->addBlind(23, 22, 0, 17650, 0, secrets.sinric.right_blinds_id);
-    blindManager->addBlind(18, 19, 0, 17650, 0, secrets.sinric.left_blinds_id);
+    blindManager->addBlind(23, 22, (int)EEPROM::readUInt("steps_0"), 17650, 0, secrets.sinric.right_blinds_id);
+    blindManager->addBlind(18, 19, (int)EEPROM::readUInt("steps_1"), 17650, 0, secrets.sinric.left_blinds_id);
     sinric = new SinricHandler(blindManager->blinds, secrets.sinric.app_key, secrets.sinric.app_secret);
 
     delay(500);

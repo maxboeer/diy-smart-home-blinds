@@ -36,8 +36,8 @@ bool SinricHandler::onRangeValue(const String &deviceId, int &position) {
     for (auto blind : blinds) {
         if (blind->sinricBlind->getDeviceId() == deviceId) {
             blind->delta_steps = map(position, 0, 100, blind->bottom_steps, blind->top_steps) - blind->position;
-            // TODO: Write to EEPROM
-            // preferences.putUInt("steps_right", step_position_right);
+            blind->position = map(position, 0, 100, blind->bottom_steps, blind->top_steps);
+            EEPROM::storeUInt("steps_" + String(blind->id), blind->position);
             break;
         }
     }
@@ -54,8 +54,7 @@ bool SinricHandler::onAdjustRangeValue(const String &deviceId, int &positionDelt
         if (blind->sinricBlind->getDeviceId() == deviceId) {
             blind->delta_steps = map(positionDelta, 0, 100, blind->bottom_steps, blind->top_steps);
             blindPosition = blind->position + blind->delta_steps;
-            // TODO: Write to EEPROM
-            // preferences.putUInt("steps_right", step_position_right);
+            EEPROM::storeUInt("steps_" + String(blind->id), blind->position);
             break;
         }
     }

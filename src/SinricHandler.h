@@ -8,6 +8,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <memory>
+#include "EEPROM.h"
 
 namespace SINRICPRO_NAMESPACE {
     class SinricProBlinds;

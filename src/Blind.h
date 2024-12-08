@@ -17,6 +17,7 @@ public:
     int delta_steps = 0;
     int top_steps;
     int bottom_steps;
+    int id;
 private:
     void step(bool dir);
     int dir_pin;
@@ -25,6 +26,7 @@ private:
     unsigned int iterations = 0;
     const Lookups::accelLookup<(unsigned int)Lookups::L_accel>* accel_lookup;
     const Lookups::decelLookup<(unsigned int)Lookups::L_decel>* decel_lookup;
+    static int blindCount;
 };
 
 

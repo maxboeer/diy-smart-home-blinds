@@ -3,6 +3,7 @@
 //
 
 #include "WifiManager.h"
+#include "BlindManager.h"
 
 unsigned long WifiManager::reconnectInterval = 1000*1000*15;
 
@@ -56,7 +57,6 @@ void WifiManager::reconnect() {
 
 void WifiManager::restart() {
     Serial.println("restarting in 5 Seconds");
-    //TODO: Save the current step positions to preferences
 //    // Save the current step positions to preferences
 //    if(preferences.getUInt("steps_right") != step_position_right)
 //        preferences.putUInt("steps_right", step_position_right);
