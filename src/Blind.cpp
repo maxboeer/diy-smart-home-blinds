@@ -4,13 +4,15 @@
 
 #include "Blind.h"
 
-Blind::Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_steps, const String& BlindID){
+Blind::Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_steps, const String& BlindID, const Lookups::accelLookup<(unsigned int)Lookups::L_accel>* accel_lookup, const Lookups::decelLookup<(unsigned int)Lookups::L_decel>* decel_lookup) {
     this->dir_pin = dir_pin;
     this->step_pin = step_pin;
     this->position = position;
     this->top_steps = top_steps;
     this->bottom_steps = bottom_steps;
     this->sinricBlind = SinricHandler::getBlind(BlindID);
+    this->accel_lookup = accel_lookup;
+    this->decel_lookup = decel_lookup;
 
     pinMode(dir_pin, OUTPUT);
     pinMode(step_pin, OUTPUT);
@@ -30,31 +32,22 @@ void Blind::doTick() {
         return;
     }
 
-    // Parameters
-    double L_accel = 1000; // Total length of the acceleration phase
-    double L_decel = 1000; // Total length of the deceleration phase
-    double M = 1.0 / steptime_low; // Maximum speed (y-value)
-    double c_accel = 3.0; // Curvature for acceleration
-    double c_decel = 3.0; // Curvature for deceleration
-    double t_w_accel = 0.5; // Midpoint of the acceleration phase (percentage of L_accel)
-    double t_w_decel = 0.5; // Midpoint of the deceleration phase (percentage of L_decel)
-
     // Calculate normalized time (0 to 1)
     double x = double(iterations);
     double speed = 0.0;
 
     // Acceleration phase
-    if (x <= L_accel) {
-        speed = M * pow(x / (t_w_accel * L_accel), c_accel) / (pow(x / (t_w_accel * L_accel), c_accel) + pow((L_accel - x) / ((1 - t_w_accel) * L_accel), c_accel));
+    if (x <= accel_lookup->length) {
+        speed = accel_lookup->arr[int(x)];
     }
-        // Deceleration phase
-    else if (x >= (abs(delta_steps) - L_decel)) {
+    // Deceleration phase
+    else if (x >= (abs(delta_steps) - decel_lookup->length)) {
         double x_decel = abs(delta_steps) - x;
-        speed = M * pow(x_decel / (t_w_decel * L_decel), c_decel) / (pow(x_decel / (t_w_decel * L_decel), c_decel) + pow((L_decel - x_decel) / ((1 - t_w_decel) * L_decel), c_decel));
+        speed = decel_lookup->arr[int(x_decel)];
     }
-        // Constant speed phase
+    // Constant speed phase
     else {
-        speed = M;
+        speed = Lookups::M;
     }
 
     // Convert speed to step time
