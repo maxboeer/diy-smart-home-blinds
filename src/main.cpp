@@ -31,8 +31,11 @@ BlindManager* blindManager;
 void setup() {
     setCpuFrequencyMhz(240); // Set CPU clock to 240MHz
 
+    pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(secrets.sinric.baud_rate); Serial.printf("\r\n\r\n");
-    EEPROM::init("rollos");
+    Serial.println("[SYSTEM]: Starting up...");
+
+    EEPROM::init("blinds");
 
     //setupWiFi();
     //Sinric Setup

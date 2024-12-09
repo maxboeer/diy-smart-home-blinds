@@ -15,26 +15,29 @@ void BlindManager::addBlind(int dir_pin, int step_pin, int position, int top_ste
 }
 
 void BlindManager::handle() {
-    if (blinds_running) {
-        bool someDelta = false;
-        for (auto blind : blinds) {
-            if (blind->delta_steps != 0){
-                powerOn();
-                someDelta = true;
-            }
+    bool someDelta = false;
+    for (auto blind : blinds) {
+        if (blind->position != blind->target_position) {
+            powerOn();
+            someDelta = true;
             blind->doTick();
+        } else {
+            blind->iterations = 0;
+            blind->last_target_position = blind->target_position;
         }
-        if (!someDelta) powerOff();
     }
+    if (!someDelta) powerOff();
 }
 
 void BlindManager::powerOn() {
-    digitalWrite(powerOnPin, false);
+    digitalWrite(powerOnPin, LOW);
     // Wait until the power control pin is high
     while (!digitalRead(powerControlPin)){
-        digitalWrite(LED_BUILTIN, false);}
+        digitalWrite(LED_BUILTIN, LOW);}
+    digitalWrite(LED_BUILTIN, HIGH);
 }
 
-void BlindManager::powerOff(){
-    digitalWrite(powerOnPin, true);
+void BlindManager::powerOff() {
+    digitalWrite(powerOnPin, HIGH);
+    digitalWrite(LED_BUILTIN, LOW);
 }

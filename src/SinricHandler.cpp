@@ -16,8 +16,8 @@ std::vector<Blind*> &(SinricHandler::blinds) = *(new std::vector<Blind*>);
     }
 
     // Setup SinricPro connection
-    SinricPro.onConnected([](){ Serial.printf("Connected to SinricPro\r\n"); });
-    SinricPro.onDisconnected([](){ Serial.printf("Disconnected from SinricPro\r\n"); });
+    SinricPro.onConnected([](){ Serial.printf("[SINRIC]: Connected to SinricPro\r\n"); });
+    SinricPro.onDisconnected([](){ Serial.printf("[SINRIC]: Disconnected from SinricPro\r\n"); });
     SinricPro.begin(app_key, app_secret);
 }
 
@@ -26,41 +26,38 @@ void SinricHandler::handle() {
 }
 
 bool SinricHandler::onPowerState(const String &deviceId, bool &state) {
-    Serial.printf("Device %s power turned %s \r\n", deviceId.c_str(), state?"on":"off");
+    // Serial.printf("[SINRIC]: Device %s power turned %s \r\n", deviceId.c_str(), state?"on":"off");
     return true; // request handled properly
 }
 
 bool SinricHandler::onRangeValue(const String &deviceId, int &position) {
-    Serial.println("Absolute");
-
     for (auto blind : blinds) {
         if (blind->sinricBlind->getDeviceId() == deviceId) {
-            blind->delta_steps = map(position, 0, 100, blind->bottom_steps, blind->top_steps) - blind->position;
-            blind->position = map(position, 0, 100, blind->bottom_steps, blind->top_steps);
-            EEPROM::storeUInt("steps_" + String(blind->id), blind->position);
+            blind->target_position = map(position, 0, 100, blind->bottom_steps, blind->top_steps);
+            EEPROM::storeUInt("steps_" + String(blind->id), blind->target_position);
             break;
         }
     }
 
-    Serial.printf("Device %s set position to %d\r\n", deviceId.c_str(), position);
+    //Serial.printf("[SINRIC]: Device %s set position to %d\r\n", deviceId.c_str(), position);
     return true; // request handled properly
 }
 
 bool SinricHandler::onAdjustRangeValue(const String &deviceId, int &positionDelta) {
-    Serial.println("Delta");
-    int blindPosition;
+    Blind* blind = nullptr;
 
-    for (auto blind : blinds) {
-        if (blind->sinricBlind->getDeviceId() == deviceId) {
-            blind->delta_steps = map(positionDelta, 0, 100, blind->bottom_steps, blind->top_steps);
-            blindPosition = blind->position + blind->delta_steps;
-            EEPROM::storeUInt("steps_" + String(blind->id), blind->position);
+    for (Blind* element : blinds) {
+        if (element->sinricBlind->getDeviceId() == deviceId) {
+            blind = element;
             break;
         }
     }
 
-    Serial.printf("Device %s position changed about %i to %i", deviceId.c_str(), positionDelta, blindPosition);
-    positionDelta = blindPosition; // calculate and return absolute position
+    blind->target_position = blind->position + map(positionDelta, 0, 100, blind->bottom_steps, blind->top_steps);
+    EEPROM::storeUInt("steps_" + String(blind->id), blind->target_position);
+
+    //Serial.printf("[SINRIC]: Device %s position changed about %i to %i", deviceId.c_str(), positionDelta, blind->target_position);
+    positionDelta = blind->target_position; // calculate and return absolute position
     return true; // request handled properly
 }
 

@@ -33,6 +33,7 @@ void WifiManager::reconnect() {
         static unsigned long previousmicrosWifi = current_micros;
         static unsigned long previousmicrosDot = current_micros;
         static unsigned int reconnect_counter = 0;
+        static bool led_state = true;
 
         // Check if the reconnect interval has passed
         if (current_micros - previousmicrosWifi >= reconnectInterval){
@@ -40,7 +41,7 @@ void WifiManager::reconnect() {
                 restart(); // Restart if too many reconnect attempts
 
             Serial.println("");
-            Serial.print("Reconnecting");
+            Serial.print("[Wifi]: Reconnecting");
             WiFi.disconnect();
             WiFi.reconnect();
             reconnect_counter += 1;
@@ -49,20 +50,31 @@ void WifiManager::reconnect() {
 
         // Print a dot every 250ms to indicate reconnecting
         if (current_micros - previousmicrosDot >= 250000){
+            led_state = !led_state;
+            digitalWrite(LED_BUILTIN, led_state);
             Serial.printf(".");
             previousmicrosDot = current_micros;
         }
     }
+    digitalWrite(LED_BUILTIN, LOW);
 }
 
 void WifiManager::restart() {
-    Serial.println("restarting in 5 Seconds");
+    Serial.println("[SYSTEM]: restarting in 5 Seconds");
 //    // Save the current step positions to preferences
 //    if(preferences.getUInt("steps_right") != step_position_right)
 //        preferences.putUInt("steps_right", step_position_right);
 //    if(preferences.getUInt("steps_left") != step_position_left)
 //        preferences.putUInt("steps_left", step_position_left);
 //    preferences.end();
-    delay(5000); // Wait for 5 seconds before restarting
+
+    for (int i = 0; i < 5; i++) {
+        Serial.println("[SYSTEM]: " + String(i));
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(500);
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(500);
+    }
+
     ESP.restart();
 }

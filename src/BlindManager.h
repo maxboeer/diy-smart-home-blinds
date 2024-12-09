@@ -24,7 +24,6 @@ private:
 
     int powerOnPin;
     int powerControlPin;
-    bool blinds_running = true;
 };
 
 

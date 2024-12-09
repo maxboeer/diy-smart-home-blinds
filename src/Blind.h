@@ -14,18 +14,21 @@ public:
     void doTick();
     SINRICPRO_NAMESPACE::SinricProBlinds* sinricBlind;
     int position;
-    int delta_steps = 0;
+    int target_position;
     int top_steps;
     int bottom_steps;
     int id;
+
+    int last_target_position;
+    unsigned int iterations;
 private:
     void step(bool dir);
     int dir_pin;
     int step_pin;
-    unsigned long last_step_time = 0;
-    unsigned int iterations = 0;
     const Lookups::accelLookup<(unsigned int)Lookups::L_accel>* accel_lookup;
     const Lookups::decelLookup<(unsigned int)Lookups::L_decel>* decel_lookup;
+    unsigned long last_step_time;
+    double steptime;
     static int blindCount;
 };
 
