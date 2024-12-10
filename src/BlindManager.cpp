@@ -17,13 +17,16 @@ void BlindManager::addBlind(int dir_pin, int step_pin, int position, int top_ste
 void BlindManager::handle() {
     bool someDelta = false;
     for (auto blind : blinds) {
-        if (blind->position != blind->target_position) {
+        if (!blind->target_positions.empty()) {
+            if (blind->position == blind->target_positions.front()){
+                blind->iterations = 0;
+                blind->last_target_position = blind->target_positions.front();
+                blind->target_positions.pop();
+                continue;
+            }
             powerOn();
             someDelta = true;
             blind->doTick();
-        } else {
-            blind->iterations = 0;
-            blind->last_target_position = blind->target_position;
         }
     }
     if (!someDelta) powerOff();

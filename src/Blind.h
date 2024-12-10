@@ -5,6 +5,7 @@
 #ifndef DIY_SMART_HOME_BLINDS_BLIND_H
 #define DIY_SMART_HOME_BLINDS_BLIND_H
 #include <Arduino.h>
+#include <queue>
 #include "SinricHandler.h"
 #include "Lookups.cpp"
 
@@ -14,7 +15,7 @@ public:
     void doTick();
     SINRICPRO_NAMESPACE::SinricProBlinds* sinricBlind;
     int position;
-    int target_position;
+    std::queue<int> target_positions;
     int top_steps;
     int bottom_steps;
     int id;

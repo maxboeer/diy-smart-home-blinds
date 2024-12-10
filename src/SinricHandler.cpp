@@ -35,8 +35,8 @@ bool SinricHandler::onRangeValue(const String &deviceId, int &position) {
 
     for (auto blind : blinds) {
         if (blind->sinricBlind->getDeviceId() == deviceId) {
-            blind->target_position = map(position, 0, 100, blind->bottom_steps, blind->top_steps);
-            EEPROM::storeUInt("steps_" + String(blind->id), blind->target_position);
+            blind->target_positions.push(map(position, 0, 100, blind->bottom_steps, blind->top_steps));
+            EEPROM::storeUInt("steps_" + String(blind->id), blind->target_positions.front());
             break;
         }
     }
@@ -45,6 +45,7 @@ bool SinricHandler::onRangeValue(const String &deviceId, int &position) {
     return true; // request handled properly
 }
 
+//could lead to issues with queue, but actually never used
 bool SinricHandler::onAdjustRangeValue(const String &deviceId, int &positionDelta) {
     Serial.println("onAdjustRangeValue");
     Blind* blind = nullptr;
@@ -56,11 +57,11 @@ bool SinricHandler::onAdjustRangeValue(const String &deviceId, int &positionDelt
         }
     }
 
-    blind->target_position = blind->position + map(positionDelta, 0, 100, blind->bottom_steps, blind->top_steps);
-    EEPROM::storeUInt("steps_" + String(blind->id), blind->target_position);
+    blind->target_positions.push(blind->position + map(positionDelta, 0, 100, blind->bottom_steps, blind->top_steps));
+    EEPROM::storeUInt("steps_" + String(blind->id), blind->target_positions.front());
 
-    Serial.printf("[SINRIC]: Device %s position changed about %i to %i", deviceId.c_str(), positionDelta, blind->target_position);
-    positionDelta = blind->target_position; // calculate and return absolute position
+    Serial.printf("[SINRIC]: Device %s position changed about %i to %i", deviceId.c_str(), positionDelta, blind->target_positions.back());
+    positionDelta = blind->target_positions.back(); // calculate and return absolute position
     return true; // request handled properly
 }
 

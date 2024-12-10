@@ -10,7 +10,7 @@ Blind::Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_
     this->dir_pin = dir_pin;
     this->step_pin = step_pin;
     this->position = position;
-    this->target_position = position;
+    this->target_positions.push(position);
     this->last_target_position = position;
     this->top_steps = top_steps;
     this->bottom_steps = bottom_steps;
@@ -47,7 +47,7 @@ void Blind::doTick() {
     if (current_micros - last_step_time >= steptime) {
 //        Serial.println("Steptime: " + String(steptime, 20));
         // Calculate the number of steps to perform
-        int delta_steps = target_position - position;
+        int delta_steps = target_positions.front() - position;
 
         // Perform the step
         {
@@ -59,7 +59,7 @@ void Blind::doTick() {
 
         // Calculate the step time
         {
-            int total_delta_steps = abs(target_position - last_target_position); // Calculate the total number of steps to the target position
+            int total_delta_steps = abs(target_positions.front() - last_target_position); // Calculate the total number of steps to the target position
 
             // Determine the number of steps for acceleration and deceleration
             int accel_steps = min(total_delta_steps / 2, accel_lookup->length);
