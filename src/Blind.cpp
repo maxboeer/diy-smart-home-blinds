@@ -39,6 +39,8 @@ void Blind::step(bool dir){
 }
 
 void Blind::doTick() {
+    //TODO: Handle changes in target position during movement (maybe target position queue)
+    //TODO: check for target position out of bounds
     unsigned long current_micros = micros(); // Get the current time in microseconds
 
     // If enough time has passed since the last step, perform the next step
