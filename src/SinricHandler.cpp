@@ -26,11 +26,13 @@ void SinricHandler::handle() {
 }
 
 bool SinricHandler::onPowerState(const String &deviceId, bool &state) {
-    // Serial.printf("[SINRIC]: Device %s power turned %s \r\n", deviceId.c_str(), state?"on":"off");
+     Serial.printf("[SINRIC]: Device %s power turned %s \r\n", deviceId.c_str(), state?"on":"off");
     return true; // request handled properly
 }
 
 bool SinricHandler::onRangeValue(const String &deviceId, int &position) {
+    Serial.println("onRangeValue");
+
     for (auto blind : blinds) {
         if (blind->sinricBlind->getDeviceId() == deviceId) {
             blind->target_position = map(position, 0, 100, blind->bottom_steps, blind->top_steps);
@@ -39,11 +41,12 @@ bool SinricHandler::onRangeValue(const String &deviceId, int &position) {
         }
     }
 
-    //Serial.printf("[SINRIC]: Device %s set position to %d\r\n", deviceId.c_str(), position);
+    Serial.printf("[SINRIC]: Device %s set position to %d\r\n", deviceId.c_str(), position);
     return true; // request handled properly
 }
 
 bool SinricHandler::onAdjustRangeValue(const String &deviceId, int &positionDelta) {
+    Serial.println("onAdjustRangeValue");
     Blind* blind = nullptr;
 
     for (Blind* element : blinds) {
@@ -56,13 +59,13 @@ bool SinricHandler::onAdjustRangeValue(const String &deviceId, int &positionDelt
     blind->target_position = blind->position + map(positionDelta, 0, 100, blind->bottom_steps, blind->top_steps);
     EEPROM::storeUInt("steps_" + String(blind->id), blind->target_position);
 
-    //Serial.printf("[SINRIC]: Device %s position changed about %i to %i", deviceId.c_str(), positionDelta, blind->target_position);
+    Serial.printf("[SINRIC]: Device %s position changed about %i to %i", deviceId.c_str(), positionDelta, blind->target_position);
     positionDelta = blind->target_position; // calculate and return absolute position
     return true; // request handled properly
 }
 
 SinricProBlinds *SinricHandler::getBlind(const String &deviceId) {
-    // TODO: Check if new SinricProBlinds(deviceId) is the same as SinricPro[deviceId];
-    // SinrricPro[deviceId];
-    return new SinricProBlinds (deviceId);
+    SinricProBlinds& blind = SinricPro[deviceId];
+    return &blind;
+//    return new SinricProBlinds (deviceId);
 }

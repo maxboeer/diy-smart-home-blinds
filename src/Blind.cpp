@@ -19,6 +19,10 @@ Blind::Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_
     this->decel_lookup = decel_lookup;
     this->iterations = 0;
     this->last_step_time = micros();
+    for (unsigned int i = 0; i < accel_lookup->length; ++i) {
+        Serial.println("accel_lookup[" + String(i) + "] = " + String(accel_lookup->arr[i]));
+    }
+    Serial.println("Steptime: " + String(1 / accel_lookup->arr[0]));
     this->steptime = 1 / accel_lookup->arr[0];
     this->id = blindCount++;
 
@@ -39,6 +43,7 @@ void Blind::doTick() {
 
     // If enough time has passed since the last step, perform the next step
     if (current_micros - last_step_time >= steptime) {
+//        Serial.println("Steptime: " + String(steptime, 20));
         // Calculate the number of steps to perform
         int delta_steps = target_position - position;
 
@@ -62,15 +67,15 @@ void Blind::doTick() {
             double speed = 0.0;
 
             // Acceleration phase
-            if (x <= accel_steps) {
+            if (x < accel_steps) {
                 speed = accel_lookup->arr[int(x)];
             }
-                // Deceleration phase
-            else if (x >= (total_delta_steps - decel_steps)) {
+            // Deceleration phase
+            else if (x > (total_delta_steps - decel_steps)) {
                 double x_decel = total_delta_steps - x;
                 speed = decel_lookup->arr[int(x_decel)];
             }
-                // Constant speed phase
+            // Constant speed phase
             else {
                 speed = Lookups::M;
             }
