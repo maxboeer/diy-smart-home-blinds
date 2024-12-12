@@ -3,11 +3,11 @@
 namespace Lookups {
     //    double interpolation_factor = log10(steptime_low/steptime_high) / (interpolation_length * log10(double(1)/double(2)));
     static constexpr double min_speed = 1.0 / 100000; // in steps per microsecond / steptime_high = 100 milliseconds
-    static constexpr double M = 1.0 / 100; // Assuming steptime_low = 100 microseconds
+    static constexpr double M = 1.0 / 500; // Assuming steptime_low = 100 microseconds
     static constexpr double c_accel = 1.2;
     static constexpr double c_decel = 1.2;
-    static constexpr double t_w_accel = 0.6;
-    static constexpr double t_w_decel = 0.6;
+    static constexpr double t_w_accel = 0.5;
+    static constexpr double t_w_decel = 0.5;
 
 
     template<int N>
