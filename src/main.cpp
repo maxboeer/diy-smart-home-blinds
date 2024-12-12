@@ -12,18 +12,6 @@ Preferences preferences;
 #include "BlindManager.h"
 #include "SinricHandler.h"
 
-//int dir_pin1 = 23;
-//int step_pin1 = 22;
-//int dir_pin2 = 18;
-//int step_pin2 = 19;
-//const int powerOnPin = 17;
-//const int powerControlPin = 16;
-//const int top_steps = 17650;
-//double interpolation_factorOLD = log10(steptime_low/steptime_high) / (interpolation_length * log10(double(1)/double(2)));
-
-//const unsigned long reconnectInterval = 1000*1000*15;
-//unsigned int reconnect_counter = 0;
-
 // Main setup function
 SinricHandler* sinric;
 BlindManager* blindManager;
@@ -37,9 +25,6 @@ void setup() {
 
     EEPROM::init("blinds");
 
-    //setupWiFi();
-    //Sinric Setup
-    //setupBlinds();
     WifiManager::setup(secrets.wifi.ssid, secrets.wifi.pass, 1000*1000*15);
     blindManager = new BlindManager(32, 33);
     blindManager->addBlind(19, 18, (int)EEPROM::readUInt("steps_0"), 25500, 0, secrets.sinric.right_blinds_id);
@@ -55,12 +40,4 @@ void loop() {
     sinric->handle();
     //step();
     blindManager->handle();
-
-    // Print WiFi signal strength every 30 seconds
-//    if(WiFi.status() == WL_CONNECTED && current_micros - rssi_micros_prev >= 30000000){
-//        Serial.print("Connected Network Signal Strength (RSSI): ");
-//        Serial.println(WiFi.RSSI());  /*Print WiFi signal strength*/
-//        rssi_micros_prev = current_micros;
-//        reconnect_counter = 0;
-//    }
 }
