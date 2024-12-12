@@ -10,7 +10,6 @@ Blind::Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_
     this->dir_pin = dir_pin;
     this->step_pin = step_pin;
     this->position = position;
-    this->target_positions.push(position);
     this->last_target_position = position;
     this->top_steps = top_steps;
     this->bottom_steps = bottom_steps;
@@ -19,10 +18,6 @@ Blind::Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_
     this->decel_lookup = decel_lookup;
     this->iterations = 0;
     this->last_step_time = micros();
-    for (unsigned int i = 0; i < accel_lookup->length; ++i) {
-        Serial.println("accel_lookup[" + String(i) + "] = " + String(accel_lookup->arr[i]));
-    }
-    Serial.println("Steptime: " + String(1 / accel_lookup->arr[0]));
     this->steptime = 1 / accel_lookup->arr[0];
     this->id = blindCount++;
 
@@ -39,7 +34,7 @@ void Blind::step(bool dir){
 }
 
 void Blind::doTick() {
-    //TODO: Handle changes in target position during movement (maybe target position queue)
+    //TODO: Fix direction change during movement
     //TODO: check for target position out of bounds
     unsigned long current_micros = micros(); // Get the current time in microseconds
 
@@ -47,7 +42,7 @@ void Blind::doTick() {
     if (current_micros - last_step_time >= steptime) {
 //        Serial.println("Steptime: " + String(steptime, 20));
         // Calculate the number of steps to perform
-        int delta_steps = target_positions.front() - position;
+        int delta_steps = target_positions.back() - position;
 
         // Perform the step
         {
@@ -59,7 +54,7 @@ void Blind::doTick() {
 
         // Calculate the step time
         {
-            int total_delta_steps = abs(target_positions.front() - last_target_position); // Calculate the total number of steps to the target position
+            int total_delta_steps = abs(target_positions.back() - last_target_position); // Calculate the total number of steps to the target position
 
             // Determine the number of steps for acceleration and deceleration
             int accel_steps = min(total_delta_steps / 2, accel_lookup->length);
@@ -69,17 +64,18 @@ void Blind::doTick() {
             double speed = 0.0;
 
             // Acceleration phase
-            if (x < accel_steps) {
+            if (x < accel_steps && was_running == false) {
                 speed = accel_lookup->arr[int(x)];
             }
             // Deceleration phase
-            else if (x > (total_delta_steps - decel_steps)) {
-                double x_decel = total_delta_steps - x;
-                speed = decel_lookup->arr[int(x_decel)];
+            else if (abs(delta_steps) <= decel_steps) {
+                speed = decel_lookup->arr[abs(delta_steps) - 1];
+                was_running = true;
             }
             // Constant speed phase
             else {
                 speed = Lookups::M;
+                was_running = true;
             }
 
             // Convert speed to step time

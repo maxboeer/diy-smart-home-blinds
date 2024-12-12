@@ -31,37 +31,37 @@ bool SinricHandler::onPowerState(const String &deviceId, bool &state) {
 }
 
 bool SinricHandler::onRangeValue(const String &deviceId, int &position) {
-    Serial.println("onRangeValue");
+//    Serial.println("onRangeValue");
 
     for (auto blind : blinds) {
         if (blind->sinricBlind->getDeviceId() == deviceId) {
             blind->target_positions.push(map(position, 0, 100, blind->bottom_steps, blind->top_steps));
-            EEPROM::storeUInt("steps_" + String(blind->id), blind->target_positions.front());
+            EEPROM::storeUInt("steps_" + String(blind->id), blind->target_positions.back());
             break;
         }
     }
 
-    Serial.printf("[SINRIC]: Device %s set position to %d\r\n", deviceId.c_str(), position);
+//    Serial.printf("[SINRIC]: Device %s set position to %d\r\n", deviceId.c_str(), position);
     return true; // request handled properly
 }
 
 //could lead to issues with queue, but actually never used
 bool SinricHandler::onAdjustRangeValue(const String &deviceId, int &positionDelta) {
-    Serial.println("onAdjustRangeValue");
-    Blind* blind = nullptr;
-
-    for (Blind* element : blinds) {
-        if (element->sinricBlind->getDeviceId() == deviceId) {
-            blind = element;
-            break;
-        }
-    }
-
-    blind->target_positions.push(blind->position + map(positionDelta, 0, 100, blind->bottom_steps, blind->top_steps));
-    EEPROM::storeUInt("steps_" + String(blind->id), blind->target_positions.front());
-
-    Serial.printf("[SINRIC]: Device %s position changed about %i to %i", deviceId.c_str(), positionDelta, blind->target_positions.back());
-    positionDelta = blind->target_positions.back(); // calculate and return absolute position
+//    Serial.println("onAdjustRangeValue");
+//    Blind* blind = nullptr;
+//
+//    for (Blind* element : blinds) {
+//        if (element->sinricBlind->getDeviceId() == deviceId) {
+//            blind = element;
+//            break;
+//        }
+//    }
+//
+//    blind->target_positions.push(blind->position + map(positionDelta, 0, 100, blind->bottom_steps, blind->top_steps));
+//    EEPROM::storeUInt("steps_" + String(blind->id), blind->target_positions.front());
+//
+//    Serial.printf("[SINRIC]: Device %s position changed about %i to %i", deviceId.c_str(), positionDelta, blind->target_positions.back());
+//    positionDelta = blind->target_positions.back(); // calculate and return absolute position
     return true; // request handled properly
 }
 

@@ -21,6 +21,7 @@ public:
     int id;
 
     int last_target_position;
+    bool was_running = false;
     unsigned int iterations;
 private:
     void step(bool dir);

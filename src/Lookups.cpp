@@ -30,8 +30,8 @@ namespace Lookups {
             int length = N;
         };
 
-    static constexpr double L_accel = 500;
-    static constexpr double L_decel = 500;
+    static constexpr double L_accel = 300;
+    static constexpr double L_decel = 300;
     static constexpr Lookups::accelLookup<(unsigned int)L_accel> accel_lookup = Lookups::accelLookup<(unsigned int)L_accel>();
     static constexpr Lookups::decelLookup<(unsigned int)L_decel> decel_lookup = Lookups::decelLookup<(unsigned int)L_decel>();
 }

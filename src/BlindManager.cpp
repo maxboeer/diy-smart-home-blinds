@@ -18,10 +18,12 @@ void BlindManager::handle() {
     bool someDelta = false;
     for (auto blind : blinds) {
         if (!blind->target_positions.empty()) {
-            if (blind->position == blind->target_positions.front()){
+            if (blind->position == blind->target_positions.back()){
                 blind->iterations = 0;
-                blind->last_target_position = blind->target_positions.front();
-                blind->target_positions.pop();
+                blind->last_target_position = blind->target_positions.back();
+                blind->was_running = false;
+                while (!blind->target_positions.empty())
+                    blind->target_positions.pop();
                 continue;
             }
             powerOn();
