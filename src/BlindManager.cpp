@@ -15,23 +15,21 @@ void BlindManager::addBlind(int dir_pin, int step_pin, int position, int top_ste
 }
 
 void BlindManager::handle() {
-    bool someDelta = false;
+    bool needPower = false;
     for (auto blind : blinds) {
-        if (!blind->target_positions.empty()) {
-            if (blind->position == blind->target_positions.back()){
-                blind->iterations = 0;
-                blind->last_target_position = blind->target_positions.back();
-                blind->was_running = false;
-                while (!blind->target_positions.empty())
-                    blind->target_positions.pop();
-                continue;
-            }
-            powerOn();
-            someDelta = true;
-            blind->doTick();
+        if (blind->wantsMotion()) {
+            needPower = true;
+            break;
         }
     }
-    if (!someDelta) powerOff();
+
+    if (needPower) powerOn();
+
+    for (auto blind : blinds) {
+        blind->doTick();
+    }
+
+    if (!needPower) powerOff();
 }
 
 void BlindManager::powerOn() {

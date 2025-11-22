@@ -7,12 +7,13 @@
 #include <Arduino.h>
 #include <queue>
 #include "SinricHandler.h"
-#include "Lookups.cpp"
+#include "MotionPlanner.h"
 
 class Blind {
 public:
-    Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_steps, const String& BlindID, const Lookups::accelLookup<(unsigned int)Lookups::L_accel>* accel_lookup = &Lookups::accel_lookup, const Lookups::decelLookup<(unsigned int)Lookups::L_decel>* decel_lookup = &Lookups::decel_lookup);
+    Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_steps, const String& BlindID);
     void doTick();
+    bool wantsMotion() const;
     SINRICPRO_NAMESPACE::SinricProBlinds* sinricBlind;
     int position;
     std::queue<int> target_positions;
@@ -21,16 +22,14 @@ public:
     int id;
 
     int last_target_position;
-    bool was_running = false;
-    unsigned int iterations;
 private:
     void step(bool dir);
+    bool canStep(bool dir) const;
     int dir_pin;
     int step_pin;
-    const Lookups::accelLookup<(unsigned int)Lookups::L_accel>* accel_lookup;
-    const Lookups::decelLookup<(unsigned int)Lookups::L_decel>* decel_lookup;
-    unsigned long last_step_time;
-    double steptime;
+    MotionPlanner planner;
+    double stepAccumulator;
+    unsigned long lastUpdateMicros;
     static int blindCount;
 };
 
