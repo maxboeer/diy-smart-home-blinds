@@ -1,3 +1,5 @@
 .pio
 src/secrets.cpp
+ota.ini
 lib/*
+.idea

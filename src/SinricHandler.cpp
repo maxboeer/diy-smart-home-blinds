@@ -65,7 +65,7 @@ bool SinricHandler::onAdjustRangeValue(const String &deviceId, int &positionDelt
     return true; // request handled properly
 }
 
-SinricProBlinds *SinricHandler::getBlind(const String &deviceId) {
+SinricProBlinds* SinricHandler::getBlind(const String &deviceId) {
     SinricProBlinds& blind = SinricPro[deviceId];
     return &blind;
 //    return new SinricProBlinds (deviceId);

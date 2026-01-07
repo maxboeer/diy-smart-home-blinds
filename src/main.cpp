@@ -11,6 +11,7 @@ Preferences preferences;
 #include "WifiManager.h"
 #include "BlindManager.h"
 #include "SinricHandler.h"
+#include "OTAManager.h"
 
 // Main setup function
 SinricHandler* sinric;
@@ -25,7 +26,9 @@ void setup() {
 
     EEPROM::init("blinds");
 
-    WifiManager::setup(secrets.wifi.ssid, secrets.wifi.pass, 1000*1000*15);
+    WifiManager::setup(secrets.wifi.ssid, secrets.wifi.pass, 1000*1000*15, secrets.ota.hostname);
+    OTAManager::setup(secrets.ota.hostname, secrets.ota.port, secrets.ota.password);
+
     blindManager = new BlindManager(32, 33);
     blindManager->addBlind(19, 18, (int)EEPROM::readUInt("steps_0"), 25500, 0, secrets.sinric.right_blinds_id);
     blindManager->addBlind(26, 27, (int)EEPROM::readUInt("steps_1"), 25500, 0, secrets.sinric.left_blinds_id);
@@ -36,8 +39,7 @@ void setup() {
 
 // Main loop function
 void loop() {
-    //SinricPro.handle();
+    OTAManager::handle();
     sinric->handle();
-    //step();
     blindManager->handle();
 }

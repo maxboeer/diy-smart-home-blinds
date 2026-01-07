@@ -6,12 +6,21 @@
 #include "BlindManager.h"
 
 unsigned long WifiManager::reconnectInterval = 1000*1000*15;
+bool WifiManager::reconnectEnabled = true;
 
-void WifiManager::setup(const String &ssid, const String &passphrase, const unsigned long reconnectInterval) {
+void WifiManager::disableReconnect() {
+    reconnectEnabled = false;
+}
+
+void WifiManager::setup(const String &ssid, const String &passphrase, const unsigned long reconnectInterval, const String &hostname) {
     WifiManager::reconnectInterval = reconnectInterval;
 
     WiFi.disconnect(true);
     delay(1000);
+
+    WiFi.mode(WIFI_STA);  // Explicitly set to Station mode (critical for OTA!)
+
+    WiFi.setHostname(hostname.c_str());
     WiFi.onEvent(WiFiDisconnected, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
 
     WiFi.begin(ssid, passphrase);
@@ -21,10 +30,13 @@ void WifiManager::setup(const String &ssid, const String &passphrase, const unsi
 
     IPAddress localIP = WiFi.localIP();
     Serial.printf("connected!\r\n[WiFi]: IP-Address is %d.%d.%d.%d\r\n", localIP[0], localIP[1], localIP[2], localIP[3]);
+    Serial.printf("[WiFi]: Hostname is %s\r\n", WiFi.getHostname());
 }
 
 void WifiManager::WiFiDisconnected(WiFiEvent_t event, WiFiEventInfo_t info){
-    reconnect();
+    if (reconnectEnabled) {
+        reconnect();
+    }
 }
 
 void WifiManager::reconnect() {

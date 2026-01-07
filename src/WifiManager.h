@@ -15,11 +15,14 @@
 class WifiManager {
 public:
     static void setup(const String &ssid, const String &passphrase, unsigned long reconnectInterval);
+    static void setup(const String &ssid, const String &passphrase, unsigned long reconnectInterval, const String &hostname);
+    static void disableReconnect();
 private:
     static void restart();
     static void reconnect();
     static void WiFiDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
     static unsigned long reconnectInterval;
+    static bool reconnectEnabled;
 };
 
 

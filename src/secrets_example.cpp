@@ -11,5 +11,9 @@ struct secretsNamespace::_secrets secretsExample = {
         "EXAMPLE_APP_SECRET",
         "EXAMPLE_RIGHT_BLINDS_ID",
         "EXAMPLE_LEFT_BLINDS_ID",
-        500000
+        500000,
+
+        OTA_HOSTNAME,
+        3232,
+        OTA_PASSWORD,
 };
