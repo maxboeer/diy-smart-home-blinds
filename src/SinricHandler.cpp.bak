@@ -1,7 +1,7 @@
 #include "SinricPro.h"
 #include "SinricProBlinds.h"
 
-#include "SinricHandler.h"
+#include "SinricHandler.cpp.h"
 #include "Blind.h"
 
 std::vector<Blind*> &(SinricHandler::blinds) = *(new std::vector<Blind*>);

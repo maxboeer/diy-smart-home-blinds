@@ -14,9 +14,9 @@
 
 class WifiManager {
 public:
-    static void setup(const String &ssid, const String &passphrase, unsigned long reconnectInterval);
     static void setup(const String &ssid, const String &passphrase, unsigned long reconnectInterval, const String &hostname);
     static void disableReconnect();
+    static WiFiClient client;
 private:
     static void restart();
     static void reconnect();

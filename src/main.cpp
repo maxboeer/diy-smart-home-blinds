@@ -10,18 +10,18 @@ Preferences preferences;
 #include "secrets.h"
 #include "WifiManager.h"
 #include "BlindManager.h"
-#include "SinricHandler.h"
 #include "OTAManager.h"
+#include "MQTTManager.h"
 
 // Main setup function
-SinricHandler* sinric;
 BlindManager* blindManager;
+MQTTManager* mqttManager;
 
 void setup() {
     setCpuFrequencyMhz(240); // Set CPU clock to 240MHz
 
     pinMode(LED_BUILTIN, OUTPUT);
-    Serial.begin(secrets.sinric.baud_rate); Serial.printf("\r\n\r\n");
+    Serial.begin(115200); Serial.printf("\r\n\r\n");
     Serial.println("[SYSTEM]: Starting up...");
 
     EEPROM::init("blinds");
@@ -30,9 +30,9 @@ void setup() {
     OTAManager::setup(secrets.ota.hostname, secrets.ota.port, secrets.ota.password);
 
     blindManager = new BlindManager(32, 33);
-    blindManager->addBlind(19, 18, (int)EEPROM::readUInt("steps_0"), 25500, 0, secrets.sinric.right_blinds_id);
-    blindManager->addBlind(26, 27, (int)EEPROM::readUInt("steps_1"), 25500, 0, secrets.sinric.left_blinds_id);
-    sinric = new SinricHandler(blindManager->blinds, secrets.sinric.app_key, secrets.sinric.app_secret);
+    blindManager->addBlind(19, 18, (int)EEPROM::readUInt("steps_0"), 25500, 0, "blind_left");
+    blindManager->addBlind(26, 27, (int)EEPROM::readUInt("steps_1"), 25500, 0, "blind_right");
+    mqttManager = new MQTTManager(secrets.mqtt.broker_ip, secrets.mqtt.user, secrets.mqtt.password);
 
     delay(500);
 }
@@ -40,6 +40,6 @@ void setup() {
 // Main loop function
 void loop() {
     OTAManager::handle();
-    sinric->handle();
+    mqttManager->handle();
     blindManager->handle();
 }

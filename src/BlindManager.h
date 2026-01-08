@@ -11,13 +11,15 @@
 
 #include "Blind.h"
 #include <vector>
+#include "EEPROM.h"
 
 class BlindManager {
 public:
     BlindManager(int powerOnPin, int powerControlPin);
     void addBlind(int dir_pin, int step_pin, int position, int top_steps, int bottom_steps, const String& BlindID);
+    Blind* getBlind(int id);
     void handle();
-    std::vector<Blind*> blinds;
+    static std::vector<Blind*> blinds;
 private:
     void powerOn();
     void powerOff();

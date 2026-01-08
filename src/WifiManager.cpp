@@ -7,6 +7,7 @@
 
 unsigned long WifiManager::reconnectInterval = 1000*1000*15;
 bool WifiManager::reconnectEnabled = true;
+WiFiClient WifiManager::client;
 
 void WifiManager::disableReconnect() {
     reconnectEnabled = false;

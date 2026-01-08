@@ -7,11 +7,9 @@ struct secretsNamespace::_secrets secretsExample = {
         "EXAMPLE_WIFI_SSID",
         "EXAMPLE_WIFI_PASSWORD",
 
-        "EXAMPLE_APP_KEY",
-        "EXAMPLE_APP_SECRET",
-        "EXAMPLE_RIGHT_BLINDS_ID",
-        "EXAMPLE_LEFT_BLINDS_ID",
-        500000,
+        IPAddress(192, 168, 178, 100),
+        "EXAMPLE_MQTT_USER",
+        "EXAMPLE_MQTT_PASSWORD",
 
         OTA_HOSTNAME,
         3232,

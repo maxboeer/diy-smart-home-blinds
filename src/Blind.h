@@ -6,14 +6,12 @@
 #define DIY_SMART_HOME_BLINDS_BLIND_H
 #include <Arduino.h>
 #include <queue>
-#include "SinricHandler.h"
 #include "Lookups.cpp"
 
 class Blind {
 public:
     Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_steps, const String& BlindID, const Lookups::accelLookup<(unsigned int)Lookups::L_accel>* accel_lookup = &Lookups::accel_lookup, const Lookups::decelLookup<(unsigned int)Lookups::L_decel>* decel_lookup = &Lookups::decel_lookup);
     void doTick();
-    SINRICPRO_NAMESPACE::SinricProBlinds* sinricBlind;
     int position;
     std::queue<int> target_positions;
     int top_steps;

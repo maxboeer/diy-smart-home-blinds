@@ -5,6 +5,8 @@
 #include "OTAManager.h"
 #include "WifiManager.h"
 #include <ArduinoOTA.h>
+
+#include "BlindManager.h"
 #include "esp_system.h"
 
 void OTAManager::setup(const String& hostname, const uint16_t& port, const String& password) {
@@ -26,6 +28,7 @@ void OTAManager::setup(const String& hostname, const uint16_t& port, const Strin
             })
             .onEnd([]() {
                 Serial.println("\n[OTA]: Update finished!");
+                digitalWrite(LED_BUILTIN, LOW);
                 Serial.println("[SYSTEM]: Restarting now...");
                 Serial.flush();
                 // Disable WiFi reconnect to prevent event loop during restart
@@ -36,6 +39,12 @@ void OTAManager::setup(const String& hostname, const uint16_t& port, const Strin
             })
             .onProgress([](unsigned int progress, unsigned int total) {
                 Serial.printf("[OTA]: Progress: %u%%\r", (progress / (total / 100)));
+
+                static unsigned long lastBlink = 0;
+                if (millis() - lastBlink > 100) {  // Blinkt alle 100ms während des Updates
+                    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+                    lastBlink = millis();
+                }
             })
             .onError([](ota_error_t error) {
                 Serial.printf("[OTA]: Error[%u]: ", error);
@@ -50,6 +59,7 @@ void OTAManager::setup(const String& hostname, const uint16_t& port, const Strin
                 } else if (error == OTA_END_ERROR) {
                     Serial.println("End Failed");
                 }
+                digitalWrite(LED_BUILTIN, HIGH);
             });
 
     ArduinoOTA.begin();

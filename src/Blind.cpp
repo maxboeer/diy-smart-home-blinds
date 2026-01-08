@@ -4,6 +4,8 @@
 
 #include "Blind.h"
 
+#include "BlindManager.h"
+
 int Blind::blindCount = 0;
 
 Blind::Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_steps, const String& BlindID, const Lookups::accelLookup<(unsigned int)Lookups::L_accel>* accel_lookup, const Lookups::decelLookup<(unsigned int)Lookups::L_decel>* decel_lookup) {
@@ -13,7 +15,6 @@ Blind::Blind(int dir_pin, int step_pin, int position, int top_steps, int bottom_
     this->last_target_position = position;
     this->top_steps = top_steps;
     this->bottom_steps = bottom_steps;
-    this->sinricBlind = SinricHandler::getBlind(BlindID);
     this->accel_lookup = accel_lookup;
     this->decel_lookup = decel_lookup;
     this->iterations = 0;
