@@ -35,8 +35,11 @@ private:
     static void publishState(Blind* blind);
     static void publishPosition(Blind* blind, int8_t targetPosition = -1);  // -1 = use current position
 
+    // Reconnect handling
+    static void handleReconnect();
+
     static AsyncMqttClient mqttClient;
-    static unsigned long lastPositionUpdate;
+    static bool isConnected;
 };
 
 

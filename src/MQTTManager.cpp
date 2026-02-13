@@ -5,6 +5,7 @@
 #include "MQTTManager.h"
 
 #include <map>
+#include <WiFi.h>
 
 #include "BlindManager.h"
 #include "Blind.h"
@@ -12,7 +13,7 @@
 
 // Static member initialization
 AsyncMqttClient MQTTManager::mqttClient;
-unsigned long MQTTManager::lastPositionUpdate = 0;
+bool MQTTManager::isConnected = false;
 
 MQTTManager::MQTTManager(const IPAddress &mqtt_broker_ip, const String &mqtt_user, const String &mqtt_password) {
     // Setup MQTT callbacks
@@ -32,6 +33,8 @@ MQTTManager::MQTTManager(const IPAddress &mqtt_broker_ip, const String &mqtt_use
 }
 
 void MQTTManager::handle() {
+    // Handle reconnection if disconnected
+    handleReconnect();
 
     // Check every 2 seconds for changes in target positions and publish state if changed
     static unsigned long lastCheck = 0;
@@ -66,6 +69,8 @@ void MQTTManager::handle() {
 
 void MQTTManager::onMqttConnect(bool sessionPresent) {
     Serial.println("[MQTT]: Connected to broker");
+    isConnected = true;
+    digitalWrite(LED_BUILTIN, LOW);  // Turn off LED when connected
 
     // Publish Home Assistant Discovery for all blinds
     for (auto blind : BlindManager::blinds) {
@@ -80,12 +85,18 @@ void MQTTManager::onMqttConnect(bool sessionPresent) {
 
         Serial.printf("[MQTT]: Subscribed to %s\r\n", setTopic.c_str());
         Serial.printf("[MQTT]: Subscribed to %s\r\n", setPositionTopic.c_str());
+
+        // Publish current state and position so they are not unknown in Home Assistant
+        publishState(blind);
+        publishPosition(blind);
+        Serial.printf("[MQTT]: Published current state and position for Blind %d\r\n", blind->id);
     }
 }
 
 void MQTTManager::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     Serial.println("[MQTT]: Disconnected from broker");
-    // Reconnection is handled automatically by AsyncMqttClient
+    isConnected = false;
+    // Reconnection is handled in handle() function
 }
 
 void MQTTManager::onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
@@ -263,3 +274,35 @@ void MQTTManager::publishPosition(Blind* blind, int8_t targetPosition) {
 
     mqttClient.publish(positionTopic.c_str(), 1, false, String(positionToPublish).c_str());
 }
+
+void MQTTManager::handleReconnect() {
+    // Check if we're connected
+    if (isConnected) {
+        return;  // Already connected, nothing to do
+    }
+
+    // WiFi must be connected first
+    if (WiFi.status() != WL_CONNECTED) {
+        return;  // WiFi not connected, wait for WiFi first
+    }
+
+    static unsigned long lastLedBlink = 0;
+    static bool ledState = LOW;
+
+    // Blink LED slowly (1 second interval) to indicate MQTT reconnecting
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastLedBlink >= 1000) {
+        ledState = !ledState;
+        digitalWrite(LED_BUILTIN, ledState);
+        lastLedBlink = currentMillis;
+    }
+
+    // Try to reconnect every 5 seconds
+    static unsigned long lastReconnectAttempt = 0;
+    if (currentMillis - lastReconnectAttempt >= 5000) {
+        Serial.println("[MQTT]: Attempting to reconnect...");
+        mqttClient.connect();
+        lastReconnectAttempt = currentMillis;
+    }
+}
+
