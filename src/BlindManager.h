@@ -26,6 +26,7 @@ private:
 
     int powerOnPin;
     int powerControlPin;
+    static bool isPowerOn;
 };
 
 

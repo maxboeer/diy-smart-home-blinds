@@ -276,6 +276,10 @@ void MQTTManager::publishPosition(Blind* blind, int8_t targetPosition) {
 }
 
 void MQTTManager::handleReconnect() {
+    static unsigned long lastLedBlink = 0;
+    static bool ledState = LOW;
+    static unsigned long lastReconnectAttempt = 0;
+
     // Check if we're connected
     if (isConnected) {
         return;  // Already connected, nothing to do
@@ -286,9 +290,6 @@ void MQTTManager::handleReconnect() {
         return;  // WiFi not connected, wait for WiFi first
     }
 
-    static unsigned long lastLedBlink = 0;
-    static bool ledState = LOW;
-
     // Blink LED slowly (1 second interval) to indicate MQTT reconnecting
     unsigned long currentMillis = millis();
     if (currentMillis - lastLedBlink >= 1000) {
@@ -298,7 +299,6 @@ void MQTTManager::handleReconnect() {
     }
 
     // Try to reconnect every 5 seconds
-    static unsigned long lastReconnectAttempt = 0;
     if (currentMillis - lastReconnectAttempt >= 5000) {
         Serial.println("[MQTT]: Attempting to reconnect...");
         mqttClient.connect();

@@ -8,6 +8,7 @@
 
 // Static member initialization
 std::vector<Blind*> BlindManager::blinds;
+bool BlindManager::isPowerOn = false;
 
 BlindManager::BlindManager(int powerOnPin, int powerControlPin) : powerOnPin(powerOnPin), powerControlPin(powerControlPin) {
     pinMode(powerOnPin, OUTPUT);
@@ -48,14 +49,23 @@ void BlindManager::handle() {
 }
 
 void BlindManager::powerOn() {
-    digitalWrite(powerOnPin, LOW);
-    // Wait until the power control pin is high
-    while (!digitalRead(powerControlPin)){
-        digitalWrite(LED_BUILTIN, LOW);}
-    digitalWrite(LED_BUILTIN, HIGH);
+    // Only change power state if not already on
+    if (!isPowerOn) {
+        digitalWrite(powerOnPin, LOW);
+        // Wait until the power control pin is high
+        while (!digitalRead(powerControlPin)) {
+            delay(1);  // Small delay to prevent busy waiting
+        }
+        isPowerOn = true;
+        digitalWrite(LED_BUILTIN, HIGH);  // Turn LED on when power turns on
+    }
 }
 
 void BlindManager::powerOff() {
-    digitalWrite(powerOnPin, HIGH);
-    digitalWrite(LED_BUILTIN, LOW);
+    // Only change power state if not already off
+    if (isPowerOn) {
+        digitalWrite(powerOnPin, HIGH);
+        isPowerOn = false;
+        digitalWrite(LED_BUILTIN, LOW);  // Turn LED off when power turns off
+    }
 }
